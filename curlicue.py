@@ -189,7 +189,6 @@ class Curlicue(bpy.types.Operator) :
                 #end if
             #end for
             the_curve = bpy.data.meshes.new(curve_name)
-            sys.stderr.write("mesh verts[{}] = {}, faces[{}] = {}\n".format(len(vertices), vertices, len(faces), faces)) # debug
             the_curve.from_pydata(vertices, [], faces)
             the_curve.update()
             the_obj = bpy.data.objects.new(curve_name, the_curve)
