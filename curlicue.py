@@ -2,17 +2,7 @@
 # This addon for Blender 2.7 generates a tapering spiral-shaped mesh.
 #
 # Copyright 2015 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
-#
-# This program is free software: you can redistribute it and/or modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation, either version 3 of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
 import math
@@ -127,6 +117,7 @@ class Curlicue(bpy.types.Operator) :
     #end draw
 
     def action_common(self, context, redoing) :
+        # TODO: get it to work in mesh-edit mode
         try :
             curve_name = "Curlicue"
             vertices = []
