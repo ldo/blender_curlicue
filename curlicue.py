@@ -1,7 +1,7 @@
 #+
 # This addon for Blender 2.7 generates a tapering spiral-shaped mesh.
 #
-# Copyright 2015 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Copyright 2015-2016 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
@@ -13,12 +13,14 @@ import mathutils
 from mathutils import \
     Matrix, \
     Vector
+from bpy_extras import \
+    object_utils
 
 bl_info = \
     {
         "name" : "Curlicue",
         "author" : "Lawrence D'Oliveiro <ldo@geek-central.gen.nz>",
-        "version" : (0, 2, 0),
+        "version" : (0, 2, 1),
         "blender" : (2, 7, 6),
         "location" : "Add > Mesh > Curlicue",
         "description" :
@@ -117,7 +119,6 @@ class Curlicue(bpy.types.Operator) :
     #end draw
 
     def action_common(self, context, redoing) :
-        # TODO: get it to work in mesh-edit mode
         try :
             curve_name = "Curlicue"
             vertices = []
@@ -181,13 +182,7 @@ class Curlicue(bpy.types.Operator) :
             #end for
             the_curve = bpy.data.meshes.new(curve_name)
             the_curve.from_pydata(vertices, [], faces)
-            the_curve.update()
-            the_obj = bpy.data.objects.new(curve_name, the_curve)
-            the_obj.location = bpy.context.scene.cursor_location
-            bpy.context.scene.objects.link(the_obj)
-            bpy.ops.object.select_all(action = "DESELECT")
-            the_obj.select = True
-            bpy.context.scene.objects.active = the_obj
+            object_utils.object_data_add(context, the_curve, name = curve_name)
             # all done
             status = {"FINISHED"}
         except Failure as why :
