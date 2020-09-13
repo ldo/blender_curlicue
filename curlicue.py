@@ -47,7 +47,6 @@ def props_compat(cllass) :
         for propname in dir(bpy.props)
         if propname.endswith("Property") and propname != "RemoveProperty"
       )
-    sys.stderr.write("prop_funcs = %s\n" % repr(prop_funcs)) # debug
     props = list \
       (
         (name, prop)
@@ -55,12 +54,10 @@ def props_compat(cllass) :
         for prop in (getattr(cllass, name),)
         if isinstance(prop, tuple) and len(prop) == 2 and prop[0] in prop_funcs
       )
-    sys.stderr.write("props = %s\n" % repr(props)) # debug
     for prop in props :
         delattr(cllass, prop[0])
     #end for
     if not hasattr(cllass, "__annotations__") :
-        sys.stderr.write("adding __annotations__ dict\n") # debug
         cllass.__annotations__ = {}
     #end if
     cllass.__annotations__.update(dict(props))
