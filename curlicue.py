@@ -1,7 +1,7 @@
 #+
 # This addon for Blender 2.7 generates a tapering spiral-shaped mesh.
 #
-# Copyright 2015-2016 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Copyright 2015-2020 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
@@ -20,8 +20,8 @@ bl_info = \
     {
         "name" : "Curlicue",
         "author" : "Lawrence D'Oliveiro <ldo@geek-central.gen.nz>",
-        "version" : (0, 2, 1),
-        "blender" : (2, 7, 6),
+        "version" : (0, 2, 2),
+        "blender" : (2, 83, 0),
         "location" : "Add > Mesh > Curlicue",
         "description" :
             "creates a tapering spiral mesh.",
@@ -39,6 +39,35 @@ class Failure(Exception) :
 
 #end Failure
 
+def props_compat(cllass) :
+    "converts property definitions from pre-2.8 form to 2.8+ form."
+    prop_funcs = set \
+      (
+        getattr(bpy.props, propname)
+        for propname in dir(bpy.props)
+        if propname.endswith("Property") and propname != "RemoveProperty"
+      )
+    sys.stderr.write("prop_funcs = %s\n" % repr(prop_funcs)) # debug
+    props = list \
+      (
+        (name, prop)
+        for name in dir(cllass)
+        for prop in (getattr(cllass, name),)
+        if isinstance(prop, tuple) and len(prop) == 2 and prop[0] in prop_funcs
+      )
+    sys.stderr.write("props = %s\n" % repr(props)) # debug
+    for prop in props :
+        delattr(cllass, prop[0])
+    #end for
+    if not hasattr(cllass, "__annotations__") :
+        sys.stderr.write("adding __annotations__ dict\n") # debug
+        cllass.__annotations__ = {}
+    #end if
+    cllass.__annotations__.update(dict(props))
+    return cllass
+#end props_compat
+
+@props_compat
 class Curlicue(bpy.types.Operator) :
     bl_idname = "mesh.curlicue"
     bl_label = "Curlicue"
@@ -151,28 +180,28 @@ class Curlicue(bpy.types.Operator) :
                 to_midpoint = \
                     (
                         Matrix.Rotation(angle, 4, "Z")
-                    *
+                    @
                         Matrix.Translation(Vector((radius, 0, 0)))
                     )
                 orient = math.pi / 2 # !
                 pt1 = \
                     (
                         to_midpoint
-                    *
+                    @
                         Matrix.Rotation(orient + math.pi / 2, 4, "Z")
-                    *
+                    @
                         Matrix.Translation(Vector((width / 2, 0, 0)))
-                    *
+                    @
                         Vector((0, 0, 0))
                     )
                 pt2 = \
                     (
                         to_midpoint
-                    *
+                    @
                         Matrix.Rotation(orient - math.pi / 2, 4, "Z")
-                    *
+                    @
                         Matrix.Translation(Vector((width / 2, 0, 0)))
-                    *
+                    @
                         Vector((0, 0, 0))
                     )
                 vertices.extend([pt1, pt2])
@@ -211,13 +240,13 @@ def add_invoke_item(self, context) :
 #end add_invoke_item
 
 def register() :
-    bpy.utils.register_module(__name__)
-    bpy.types.INFO_MT_mesh_add.append(add_invoke_item)
+    bpy.utils.register_class(Curlicue)
+    bpy.types.VIEW3D_MT_mesh_add.append(add_invoke_item)
 #end register
 
 def unregister() :
-    bpy.utils.unregister_module(__name__)
-    bpy.types.INFO_MT_mesh_add.remove(add_invoke_item)
+    bpy.utils.unregister_class(Curlicue)
+    bpy.types.VIEW3D_MT_mesh_add.remove(add_invoke_item)
 #end unregister
 
 if __name__ == "__main__" :
